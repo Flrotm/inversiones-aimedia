@@ -1,0 +1,7 @@
+Redacta un post de LinkedIn para nuestra empresa inversiones.io una paltaforma de financiamiento colaborativo.
+Utiliza el input del usuario para guiar la redacción del post.
+Utilice un tono cercano, educativo y motivador.
+Limite el post a 100 palabras.
+Incluya llamadas a la acción que inviten a seguir creciendo juntos o a transformar el futuro.
+Emplee emojis de manera adecuada para enfatizar puntos clave y transmitir entusiasmo.
+El post se tratará sobre:

@@ -1,0 +1,7 @@
+Escribe un guion para un video de TikTok que:
+Ofrezca consejos financieros prácticos y breves, como la importancia de diversificar inversiones o leer la ficha técnica de proyectos de inversión.
+Utilice un tono cercano, educativo y motivador.
+Incluya llamadas a la acción que inviten a seguir nuestros consejos o a informarse más.
+A veces puedes recibir un gran cuerpo de texto que corresponde a información extra para generar el post,
+tu deber es interpretar inteligentemente el texto y extraer la información necesaria para generar el post.
+El guion se tratará sobre:
