@@ -9,6 +9,7 @@ from openai import OpenAI
 import toml
 # Set your OpenAI API key
 openai.api_key = toml.load(".streamlit/secrets.toml")["opeanaikey"]
+newsapi_key = toml.load(".streamlit/secrets.toml")["newsapikey"]
 client = OpenAI(
     # This is the default and can be omitted
     api_key=openai.api_key,
@@ -47,6 +48,11 @@ st.markdown(
     """, 
     unsafe_allow_html=True
 )
+import streamlit as st
+import requests
+from bs4 import BeautifulSoup
+import tiktoken
+import random
 
 def estimate_tokens(text):
     # Estimate the number of tokens used by the text
@@ -55,51 +61,38 @@ def estimate_tokens(text):
     return len(tokens)
 
 def get_text_from_url(url):
+    # Your existing implementation...
+    pass  # Replace with your code
+
+def fetch_business_article():
+    api_key = newsapi_key
+    url = ('https://newsapi.org/v2/top-headlines?'
+       'category=business&'
+       'apiKey='+api_key)
     try:
         response = requests.get(url)
-        response.raise_for_status()  # Raise exception for HTTP errors
-
-        # Parse the HTML
-        soup = BeautifulSoup(response.text, 'html.parser')
-
-        # Remove unwanted tags
-        for tag in soup(['script', 'style', 'header', 'footer', 'nav', 'aside', 'form', 'noscript']):
-            tag.decompose()
-
-        # Extract text from specific tags
-        texts = soup.find_all(text=True)
-
-        # Define whitelist of tags
-        whitelist = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li']
-
-        visible_texts = []
-        for t in texts:
-            if t.parent.name in whitelist:
-                text = t.strip()
-                if text:
-                    visible_texts.append(text)
-
-        # Join the texts
-        text = ' '.join(visible_texts)
-
-        # Clean up the text
-        text = ' '.join(text.split())
-
-        # Estimate tokens and limit text length
-        MAX_TOKENS = 500  # Adjust based on your needs
-        tokens = estimate_tokens(text)
-
-        while tokens > MAX_TOKENS:
-            # Reduce text length by truncating
-            text = text[:int(len(text) * 0.9)]
-            tokens = estimate_tokens(text)
-
-        return text
+        data = response.json()
+        articles = data.get('articles')
+        if articles:
+            #choose a ranfom article
+            try:
+                num = random.randint(0, len(articles)-1)
+                article = articles[num]
+            except:
+                article = articles[0]
+            title = article.get('title', '')
+            description = article.get('description', '')
+            content = article.get('content', '')
+            article_text = f"{title}\n\n{description}\n\n{content}"
+            return article_text
+        else:
+            st.error("No se encontraron artículos de negocios.")
+            return ''
     except Exception as e:
-        st.error(f"Error al obtener el texto del enlace: {e}")
+        st.error(f"Error al obtener el artículo de negocios: {e}")
         return ''
 
-def generate_prompt(platform, user_input, link_text):
+def generate_prompt(platform, user_input, link_text, article_text=''):
     if platform == "Meta":
         with open("meta.txt", "r") as file:
             prompt = file.read()
@@ -114,6 +107,8 @@ def generate_prompt(platform, user_input, link_text):
     prompt += f"\n\nTema: {user_input}"
     if link_text:
         prompt += f"\n\nContenido del enlace proporcionado:\n{link_text}"
+    if article_text:
+        prompt += f"\n\nContenido del artículo de negocios:\n{article_text}"
     return prompt
 
 # Initialize session state variables
@@ -123,6 +118,8 @@ if 'options' not in st.session_state:
     st.session_state['options'] = []
 if 'selected_option' not in st.session_state:
     st.session_state['selected_option'] = ''
+if 'article_text' not in st.session_state:
+    st.session_state['article_text'] = ''
 
 # Streamlit app
 st.title("Inversiones.io Generador de Post")
@@ -151,11 +148,21 @@ user_input = st.text_area("Introduce y describe el tema sobre el que deseas escr
 # Link input
 link_input = st.text_input("Introduce un enlace (opcional):")
 
-# Generate post button
+# Fetch business article button
+if st.button("Obtener artículo de negocios"):
+    with st.spinner('Obteniendo artículo de negocios...'):
+        article_text = fetch_business_article()
+        if article_text:
+            st.session_state['article_text'] = article_text
+            st.write("Artículo obtenido:")
+            st.write(article_text)
+        else:
+            st.session_state['article_text'] = ''
 
 # Generate post button
-if st.button("Generate Post"):
-    if not user_input.strip():
+if st.button("Generar Post"):
+    article_text = st.session_state.get('article_text', '')
+    if not user_input.strip() and not article_text.strip():
         st.error("Por favor, introduce un tema sobre el que escribir.")
     elif not st.session_state['platform']:
         st.error("Por favor, selecciona una plataforma.")
@@ -164,9 +171,9 @@ if st.button("Generate Post"):
             link_text = ''
             if link_input.strip():
                 link_text = get_text_from_url(link_input)
-            prompt = generate_prompt(st.session_state['platform'], user_input, link_text)
+            article_text = st.session_state.get('article_text', '')
+            prompt = generate_prompt(st.session_state['platform'], user_input, link_text, article_text)
             print(prompt)
-
 
             try:
                 chat_completion = client.chat.completions.create(
@@ -176,7 +183,7 @@ if st.button("Generate Post"):
                             "content": prompt,
                         }
                     ],
-                    model="gpt-4o-2024-08-06",
+                    model="gpt-4",
                 )
 
                 # Store options in session state
@@ -184,12 +191,9 @@ if st.button("Generate Post"):
                 st.session_state['selected_option'] = ''
 
             except Exception as e:
-                st.error(f"Ocurrio un error: {e}")
-
+                st.error(f"Ocurrió un error: {e}")
 
 # Display the generated response
 if st.session_state['options']:
     st.subheader("Post generado:")
     st.write(st.session_state['options'])
-    
-    
