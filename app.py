@@ -4,176 +4,172 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import tiktoken  # For token estimation
-from openai import OpenAI
-#load from toml
+import random
 import toml
+from openai import OpenAI
+from datetime import datetime
+import json
+import pandas as pd
+
 # Set your OpenAI API key
 openai.api_key = toml.load(".streamlit/secrets.toml")["opeanaikey"]
 newsapi_key = toml.load(".streamlit/secrets.toml")["newsapikey"]
 client = OpenAI(
-    # This is the default and can be omitted
     api_key=openai.api_key,
 )
+
 st.markdown(
     """
     <style>
-    /* Your existing CSS styles */
     .stButton button {
         background-color: #2076AC !important;
         color: white !important;
         border: none !important;
     }
-
-    /* Text input and text area borders */
+    
     .stTextInput>div>div>input, .stTextArea textarea {
         border: 2px solid #2076AC !important;
     }
     
-    /* Focus state for text inputs and text areas */
     .stTextInput>div>div>input:focus, .stTextArea textarea:focus {
         border-color: #2076AC !important;
         box-shadow: 0 0 5px #2076AC !important;
     }
 
-    /* Spinner color */
     .stSpinner > div > div {
         border-top-color: #2076AC !important;
     }
 
-    /* Keep the main text black */
     .stMarkdown, .stText {
         color: black !important;
     }
+    .stRadio > label {
+        margin-bottom: 10px !important;
+    }
     </style>
-    """, 
+    """,
     unsafe_allow_html=True
 )
-import streamlit as st
-import requests
-from bs4 import BeautifulSoup
-import tiktoken
-import random
 
 def estimate_tokens(text):
-    # Estimate the number of tokens used by the text
-    encoding = tiktoken.encoding_for_model('gpt-3.5-turbo')  # or 'gpt-4' if you're using GPT-4
+    encoding = tiktoken.encoding_for_model('gpt-3.5-turbo')
     tokens = encoding.encode(text)
     return len(tokens)
 
-def get_text_from_url(url):
-    # Your existing implementation...
-    pass  # Replace with your code
+def fetch_rss_feed(feed_url):
+    try:
+        response = requests.get(feed_url)
+        soup = BeautifulSoup(response.content, features="xml")
+        items = soup.findAll('item')
+        today = datetime.now().date()
+        headlines = []
+        for item in items:
+            pub_date = item.pubDate.text if item.pubDate else None
+            if pub_date:
+                pub_date_parsed = datetime.strptime(pub_date, "%a, %d %b %Y %H:%M:%S %z").date()
+                if pub_date_parsed == today:
+                    headlines.append({"title": item.title.text, "link": item.link.text, "description": item.description.text})
+        return headlines
+    except Exception as e:
+        st.error(f"Error al obtener RSS Feed: {e}")
+        return []
 
-def fetch_business_article():
-    api_key = newsapi_key
+def fetch_business_headlines():
     url = ('https://newsapi.org/v2/top-headlines?'
-       'category=business&'
-       'apiKey='+api_key)
+           'category=business&'
+           'apiKey=' + newsapi_key)
     try:
         response = requests.get(url)
         data = response.json()
         articles = data.get('articles')
         if articles:
-            #choose a ranfom article
-            try:
-                num = random.randint(0, len(articles)-1)
-                article = articles[num]
-            except:
-                article = articles[0]
-            title = article.get('title', '')
-            description = article.get('description', '')
-            content = article.get('content', '')
-            article_text = f"{title}\n\n{description}\n\n{content}"
-            return article_text
+            headlines = []
+            for article in articles:
+                headlines.append({"title": article.get('title', ''), "link": article.get('url', ''), "description": article.get('description', '')})
+            return headlines
         else:
             st.error("No se encontraron artículos de negocios.")
-            return ''
+            return []
     except Exception as e:
         st.error(f"Error al obtener el artículo de negocios: {e}")
-        return ''
+        return []
 
-def generate_prompt(platform, user_input, link_text, article_text=''):
-    if platform == "Meta":
-        with open("meta.txt", "r") as file:
-            prompt = file.read()
-    elif platform == "LinkedIn":
-        with open("linkedin.txt", "r") as file:
-            prompt = file.read()
-    elif platform == "TikTok":
-        with open("tiktok.txt", "r") as file:
-            prompt = file.read()
-    
-    # Construct the prompt
-    prompt += f"\n\nTema: {user_input}"
-    if link_text:
-        prompt += f"\n\nContenido del enlace proporcionado:\n{link_text}"
-    if article_text:
-        prompt += f"\n\nContenido del artículo de negocios:\n{article_text}"
-    return prompt
+# Collect headlines from all sources
+world_headlines = fetch_business_headlines()
+gestion_headlines = fetch_rss_feed("https://gestion.pe/arc/outboundfeeds/rss/category/economia/?outputType=xml")
+elcomercio_headlines = fetch_rss_feed("https://elcomercio.pe/arc/outboundfeeds/rss/category/economia/?outputType=xml")
 
-# Initialize session state variables
-if 'platform' not in st.session_state:
-    st.session_state['platform'] = None
-if 'options' not in st.session_state:
-    st.session_state['options'] = []
-if 'selected_option' not in st.session_state:
-    st.session_state['selected_option'] = ''
-if 'article_text' not in st.session_state:
-    st.session_state['article_text'] = ''
+# Limit to 10 headlines from each source
+world_headlines = world_headlines[:10]
+gestion_headlines = gestion_headlines[:10]
+elcomercio_headlines = elcomercio_headlines[:10]
 
 # Streamlit app
 st.title("Inversiones.io Generador de Post")
-st.subheader("Selecciona una red social y escribe el contenido que deseas incluir en la publicación.")
 
-# Platform selection using buttons
-col1, col2, col3 = st.columns(3)
+# Function to display headlines with expandable descriptions in containers
+def display_headlines_with_containers(header, headlines, key_prefix):
+    today = datetime.now().strftime("%d/%m/%Y")
+    st.header(f"{header} ({today})")
+    selected_indexes = []
+    with st.container():
+        for i, headline in enumerate(headlines):
+            col1, col2 = st.columns([1, 6])
 
-with col1:
-    if st.button("Meta"):
-        st.session_state['platform'] = "Meta"
-with col2:
-    if st.button("LinkedIn"):
-        st.session_state['platform'] = "LinkedIn"
-with col3:
-    if st.button("TikTok"):
-        st.session_state['platform'] = "TikTok"
+            with col1:
+                if st.checkbox("", key=f"{key_prefix}_news_{i}"):
+                    selected_indexes.append(i)
 
-# Display the selected platform
-if st.session_state['platform']:
-    st.write(f"Plataforma seleccionada: **{st.session_state['platform']}**")
+            with col2:
+                expander = st.expander(headline['title'])
+                expander.write(headline.get('description', 'No hay descripción disponible.'))
 
-# Text input
-user_input = st.text_area("Introduce y describe el tema sobre el que deseas escribir:")
+    return selected_indexes
 
-# Link input
-link_input = st.text_input("Introduce un enlace (opcional):")
-
-# Fetch business article button
-if st.button("Obtener artículo de negocios"):
-    with st.spinner('Obteniendo artículo de negocios...'):
-        article_text = fetch_business_article()
-        if article_text:
-            st.session_state['article_text'] = article_text
-            st.write("Artículo obtenido:")
-            st.write(article_text)
-        else:
-            st.session_state['article_text'] = ''
+# Display headlines for each section
+selected_world = display_headlines_with_containers("Noticias de MUNDO", world_headlines, "world")
+selected_gestion = display_headlines_with_containers("Noticias de PERÚ - Gestion", gestion_headlines, "gestion")
+selected_elcomercio = display_headlines_with_containers("Noticias de PERÚ - El Comercio", elcomercio_headlines, "elcomercio")
 
 # Generate post button
 if st.button("Generar Post"):
-    article_text = st.session_state.get('article_text', '')
-    if not user_input.strip() and not article_text.strip():
-        st.error("Por favor, introduce un tema sobre el que escribir.")
-    elif not st.session_state['platform']:
-        st.error("Por favor, selecciona una plataforma.")
+    selected_options = []
+
+    # Gather selected news from all sections
+    if selected_world:
+        selected_options += [world_headlines[i] for i in selected_world]
+    if selected_gestion:
+        selected_options += [gestion_headlines[i] for i in selected_gestion]
+    if selected_elcomercio:
+        selected_options += [elcomercio_headlines[i] for i in selected_elcomercio]
+
+    # Limit to 3 selected options to match expected output
+    selected_options = selected_options[:3]
+
+    if not selected_options:
+        st.error("Por favor, selecciona una noticia para generar un post.")
     else:
         with st.spinner('Generando post...'):
-            link_text = ''
-            if link_input.strip():
-                link_text = get_text_from_url(link_input)
-            article_text = st.session_state.get('article_text', '')
-            prompt = generate_prompt(st.session_state['platform'], user_input, link_text, article_text)
-            print(prompt)
+            # Use simplified prompt to generate the post
+            template_prompt = """Resume estas noticias, con la idea de generar un post para 
+redes sociales, haz el post lo más atractivo posible. No uses emojis.Los titulos como maximo 6 palabras y las descripciones 30.
+El output debe ser 
+Mundo
+{title1}
+{content1}
+Peru
+{title2}
+{content2}
+Peru
+{title3}
+{content3}"""
+
+            # Construct the content for the prompt
+            content = ""
+            for option in selected_options:
+                content += f"{option['title']}\n{option['description']}\n"
+
+            prompt = template_prompt + "\n" + content
 
             try:
                 chat_completion = client.chat.completions.create(
@@ -183,9 +179,8 @@ if st.button("Generar Post"):
                             "content": prompt,
                         }
                     ],
-                    model="gpt-4",
+                    model="gpt-4o-2024-08-06",
                 )
-
                 # Store options in session state
                 st.session_state['options'] = chat_completion.choices[0].message.content
                 st.session_state['selected_option'] = ''
@@ -194,6 +189,41 @@ if st.button("Generar Post"):
                 st.error(f"Ocurrió un error: {e}")
 
 # Display the generated response
-if st.session_state['options']:
+if st.session_state.get('options'):
     st.subheader("Post generado:")
     st.write(st.session_state['options'])
+    # Print post lines for debugging
+    post_lines = st.session_state['options'].split('\n')
+    # Add buttons for editing and downloading the post
+    if st.button("Editar Post"):
+        st.text_area("Edita tu post:", value=st.session_state['options'], key="edit_post", height=300)
+    if st.button("Descargar Post como CSV"):
+        # Create a CSV file with columns Title1, Content1, Title2, Content2, Title3, Content3
+        titles = []
+        contents = []
+        for line in post_lines:
+            word_count = len(line.split())
+            if 2 <= word_count <= 8:
+                titles.append(line)
+            elif 10 <= word_count <= 35:
+                contents.append(line)
+
+        # Ensure there are exactly 3 titles and 3 contents
+        while len(titles) < 3:
+            titles.append('')
+        while len(contents) < 3:
+            contents.append('')
+
+        data = {
+            'Title1': [titles[0]],
+            'Content1': [contents[0]],
+            'Title2': [titles[1]],
+            'Content2': [contents[1]],
+            'Title3': [titles[2]],
+            'Content3': [contents[2]]
+        }
+        df = pd.DataFrame(data)
+        # Get current date to include in filename
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        csv = df.to_csv(index=False, encoding='utf-8-sig')
+        st.download_button(label="Descargar CSV", data=csv, file_name=f'post_generado_{current_date}.csv', mime='text/csv')
