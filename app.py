@@ -152,7 +152,7 @@ if st.button("Generar Post"):
         with st.spinner('Generando post...'):
             # Use simplified prompt to generate the post
             template_prompt = """Resume estas noticias, con la idea de generar un post para 
-redes sociales, haz el post lo más atractivo posible. No uses emojis.Los titulos como maximo 6 palabras y las descripciones 30.
+redes sociales, haz el post lo más atractivo posible. No uses emojis ni le pongas comillas al titulo.Los titulos como maximo 6 palabras y las descripciones 30.
 El output debe ser 
 Mundo
 {title1}
@@ -187,25 +187,31 @@ Peru
 
             except Exception as e:
                 st.error(f"Ocurrió un error: {e}")
-
 # Display the generated response
 if st.session_state.get('options'):
     st.subheader("Post generado:")
     st.write(st.session_state['options'])
     # Print post lines for debugging
     post_lines = st.session_state['options'].split('\n')
-    # Add buttons for editing and downloading the post
     if st.button("Editar Post"):
-        st.text_area("Edita tu post:", value=st.session_state['options'], key="edit_post", height=300)
+        st.session_state['edit_mode'] = True
+
+    if st.session_state.get('edit_mode', False):
+        edited_text = st.text_area("Edita tu post:", value=st.session_state['options'], key="edit_post", height=300)
+        if st.button("Guardar Edición"):
+            st.session_state['options'] = edited_text
+            st.session_state['edit_mode'] = False
+
     if st.button("Descargar Post como CSV"):
-        # Create a CSV file with columns Title1, Content1, Title2, Content2, Title3, Content3
+        # Create a CSV file with columns Title1, Content1, Title2, Content2, Title3, Content3}
+        post_lines = st.session_state['options'].split('\n')
         titles = []
         contents = []
         for line in post_lines:
             word_count = len(line.split())
-            if 2 <= word_count <= 8:
+            if 2 <= word_count <= 6:
                 titles.append(line)
-            elif 10 <= word_count <= 35:
+            elif 10 <= word_count <= 30:
                 contents.append(line)
 
         # Ensure there are exactly 3 titles and 3 contents
