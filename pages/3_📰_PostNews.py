@@ -13,7 +13,7 @@ import pandas as pd
 
 st.set_page_config(
     page_title="PostNews",
-    page_icon="👋",
+    page_icon="📰",
 )
 
 

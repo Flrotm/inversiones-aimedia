@@ -49,7 +49,7 @@ Inversiones.io ha desarrollado una plataforma de generación de contenido automa
 ---
 
 ### Recursos Adicionales
-Para aprender más sobre Streamlit y cómo se construyen aplicaciones de Ciencia de Datos:
+Para aprender más sobre INVESRIONES.IO, visita nuestro sitio web oficial:
 - [Inversiones.io](https://inversiones.io)
 
 """

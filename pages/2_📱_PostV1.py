@@ -10,7 +10,7 @@ import toml
 
 st.set_page_config(
     page_title="PostV1",
-    page_icon="👋",
+    page_icon="📱",
 )
 # Set your OpenAI API key
 openai.api_key = toml.load(".streamlit/secrets.toml")["opeanaikey"]
