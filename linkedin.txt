@@ -4,4 +4,6 @@ Utilice un tono positivo, inspirador y profesional.
 Limite el post a 100 palabras.
 Incluya llamadas a la acción que inviten a seguir creciendo juntos o a transformar el futuro.
 Emplee emojis de manera adecuada para enfatizar puntos clave y transmitir entusiasmo.
+A veces puedes recibir un gran cuerpo de texto que corresponde a información extra para generar el post,
+tu deber es interpretar inteligentemente el texto y extraer la información necesaria para generar el post.
 El post se tratará sobre:
