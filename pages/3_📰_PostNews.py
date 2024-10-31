@@ -11,6 +11,13 @@ from datetime import datetime
 import json
 import pandas as pd
 
+st.set_page_config(
+    page_title="PostNews",
+    page_icon="👋",
+)
+
+
+
 # Set your OpenAI API key
 openai.api_key = toml.load(".streamlit/secrets.toml")["opeanaikey"]
 newsapi_key = toml.load(".streamlit/secrets.toml")["newsapikey"]

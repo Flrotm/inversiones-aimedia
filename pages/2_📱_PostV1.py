@@ -7,6 +7,11 @@ import tiktoken  # For token estimation
 from openai import OpenAI
 #load from toml
 import toml
+
+st.set_page_config(
+    page_title="PostV1",
+    page_icon="👋",
+)
 # Set your OpenAI API key
 openai.api_key = toml.load(".streamlit/secrets.toml")["opeanaikey"]
 newsapi_key = toml.load(".streamlit/secrets.toml")["newsapikey"]

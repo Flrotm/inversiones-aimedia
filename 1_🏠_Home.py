@@ -1,0 +1,57 @@
+import streamlit as st
+
+st.set_page_config(
+    page_title="Home",
+    page_icon="🏠",
+)
+
+st.write("# Bienvenido al generador de contenido de Inversiones.io👋")
+
+st.sidebar.success("Selecciona una herramienta")
+
+st.markdown(
+"""    
+
+## Descripción
+Inversiones.io ha desarrollado una plataforma de generación de contenido automatizado para redes sociales, enfocada en el equipo de marketing. Utilizando IA generativa, esta herramienta crea posts estructurados para diferentes redes, ahorrando tiempo y garantizando la coherencia en la comunicación.
+
+
+## Herramientas Disponibles
+
+1. **[Versión 1: Generador de Post para Redes Sociales](PostV1)**
+   - **Objetivo**: Crear posts para diferentes plataformas sociales.
+   - **Redes Compatibles**: Meta, LinkedIn y TikTok.
+   - **Características**: Generación de posts con tono ajustado según la red social. Los posts de Meta son más amigables, LinkedIn es profesional, y TikTok genera guiones en lugar de texto.
+   - **Flujo de Uso**:
+     1. Seleccionar la red social.
+     2. Introducir el contenido o tema de la publicación.
+     3. (Opcional) agregar un enlace.
+     4. Obtener un artículo de negocios para inspiración.
+     5. Generar y revisar el post final.
+
+2. **[Versión 2: Generador de Post con Noticias](PostNews)**
+   - **Objetivo**: Automatizar la creación de contenido basado en noticias diarias.
+   - **Fuentes de Noticias**: NewsAPI (titulares de negocios globales), Gestión (Economía) y El Comercio (Titulares).
+   - **Características**: Permite seleccionar noticias por sección, generar resúmenes y descargar el contenido estructurado en CSV para subirlo a Canva.
+   - **Flujo de Uso**:
+     1. Seleccionar una noticia de cada sección.
+     2. Generar el post.
+     3. (Opcional) Editar el contenido antes de descargar.
+     4. Descargar en formato CSV.
+     5. Subir a Canva para diseñar el post final usando la función "Data Autofill".
+
+---
+
+
+
+> **Nota**: Explora cada herramienta en la barra lateral para comenzar. ¡Generar contenido nunca ha sido tan fácil y rápido!
+
+---
+
+### Recursos Adicionales
+Para aprender más sobre Streamlit y cómo se construyen aplicaciones de Ciencia de Datos:
+- [Inversiones.io](https://inversiones.io)
+
+"""
+
+)
