@@ -52,6 +52,7 @@ Inversiones.io ha desarrollado una plataforma de generación de contenido automa
 Para aprender más sobre INVESRIONES.IO, visita nuestro sitio web oficial:
 - [Inversiones.io](https://inversiones.io)
 
+# Para cualquier comentario contactar a fuccellim@gmail.com
 """
 
 )
