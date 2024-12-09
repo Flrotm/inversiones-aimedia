@@ -40,9 +40,17 @@ Inversiones.io ha desarrollado una plataforma de generación de contenido automa
      4. Descargar en formato CSV.
      5. Subir a Canva para diseñar el post final usando la función "Data Autofill".
 
----
-
-
+3. **[Versión 3: Nuevos Templates! (Finatips y Howtos)](FinaTips)**
+   - **Objetivo**: Ampliar la funcionalidad ofreciendo dos nuevos tipos de plantillas.
+   - **Nuevos Templates**:
+     - **Finatips**: Genera un post con un título y 3 párrafos sobre un tema financiero específico.
+     - **How-To**: Genera un post tipo guía con un título en forma de pregunta, y 5 pasos con títulos  y descripciones detalladas .
+   - **Flujo de Uso**:
+     1. Seleccionar el tipo de template (Finatips o How-To).
+     2. Introducir el tema.
+     3. Generar el post.
+     4. (Opcional) Editar el contenido.
+     5. Descargar el post en CSV para subirlo a Canva u otras plataformas.
 
 > **Nota**: Explora cada herramienta en la barra lateral para comenzar. ¡Generar contenido nunca ha sido tan fácil y rápido!
 
@@ -54,5 +62,4 @@ Para aprender más sobre INVESRIONES.IO, visita nuestro sitio web oficial:
 
 # Para cualquier comentario contactar a fuccellim@gmail.com
 """
-
 )
