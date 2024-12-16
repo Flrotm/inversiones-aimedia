@@ -114,7 +114,7 @@ if 'options' in st.session_state:
 
         # Convert DataFrame to CSV format
         current_date = datetime.now().strftime("%Y-%m-%d")
-        csv = df.to_csv(index=False, encoding='utf-8-sig', line_terminator='\n')
+        csv = df.to_csv(index=False, encoding='utf-8-sig')
 
         # Provide a download button for the CSV
         st.download_button(

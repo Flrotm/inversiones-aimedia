@@ -161,7 +161,7 @@ if st.button("Generar Post"):
             template_prompt = """
             Eres un asistente de marketing en Inversiones.io (una compañia de financiamiento colaborativo) y necesitas generar contenido para redes sociales.
             Resume estas noticias, con la idea de generar un post para 
-redes sociales, haz el post lo más atractivo posible. No uses emojis ni le pongas comillas al titulo.Los titulos como maximo 6 palabras y las descripciones 30.
+redes sociales, haz el post lo más atractivo posible. No uses emojis ni le pongas comillas al titulo.Los titulos como maximo 6 palabras y las descripciones 40, pero presentalo de manera interesante y mas descriptiva que el input.
 El output debe ser 
 Mundo
 {title1}
