@@ -133,3 +133,7 @@ if st.session_state.get('howto'):
             st.download_button(label="Descargar CSV", data=csv, file_name=f'post_howto_{current_date}.csv', mime='text/csv')
         except Exception as e:
             st.error(f"Ocurrió un error al procesar el JSON: {e}")
+
+#link to canvas design
+link = "https://www.canva.com/design/DAGbX0ZkSk4/VKrL4qrSmvRGE-8Qjo4m6Q/edit?utm_content=DAGbX0ZkSk4&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"
+st.markdown(f"Si deseas ver el diseño en Canva, haz click [aquí]({link}).")

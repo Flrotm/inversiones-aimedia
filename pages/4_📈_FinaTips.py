@@ -124,3 +124,6 @@ if 'options' in st.session_state:
             mime='text/csv'
         )
 
+#link to canvas
+link = "https://www.canva.com/design/DAGbXwQO53g/rzqDoWGIE003ZUzXTRJuAQ/edit?utm_content=DAGbXwQO53g&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"
+st.markdown(f"Si deseas ver el diseño en Canva, haz click [aquí]({link}).")
