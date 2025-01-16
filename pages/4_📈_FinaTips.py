@@ -107,7 +107,6 @@ if 'options' in st.session_state:
             'Content2': [lines[4]],
             'Content3': [lines[6]]
         }
-        print(data)
 
         # Create a DataFrame
         df = pd.DataFrame(data)
